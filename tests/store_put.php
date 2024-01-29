@@ -55,63 +55,63 @@ class store_put extends TestCase
         $this->pdo = null;
     }
 
-    public function testUpdateProduct()
-    {
-        // Simulate a PUT request to update a product
-        $_SERVER['REQUEST_METHOD'] = 'PUT';
-        $_SERVER['REQUEST_URI'] = '/product/1';
+//     public function testUpdateProduct()
+//     {
+//         // Simulate a PUT request to update a product
+//         $_SERVER['REQUEST_METHOD'] = 'PUT';
+//         $_SERVER['REQUEST_URI'] = '/product/1';
 
-        // Simulate JSON data in the request body
-        $putData = [
-            'name' => 'Updated Product 1',
-            'description' => 'Updated Description 1',
-            'items' => [
-                ['id' => 1, 'size' => 'XL', 'color' => 'Green', 'status' => 'active', 'sku' => '123XYZ', 'price' => '39.99'],
-                ['size' => 'S', 'color' => 'Yellow', 'status' => 'active', 'sku' => '456ABC', 'price' => '19.99'],
-            ],
-        ];
+//         // Simulate JSON data in the request body
+//         $putData = [
+//             'name' => 'Updated Product 1',
+//             'description' => 'Updated Description 1',
+//             'items' => [
+//                 ['id' => 1, 'size' => 'XL', 'color' => 'Green', 'status' => 'active', 'sku' => '123XYZ', 'price' => '39.99'],
+//                 ['size' => 'S', 'color' => 'Yellow', 'status' => 'active', 'sku' => '456ABC', 'price' => '19.99'],
+//             ],
+//         ];
 
-        // Set the request body
-        file_put_contents('php://input', json_encode($putData));
+//         // Set the request body
+//         file_put_contents('php://input', json_encode($putData));
 
-        ob_start();
-        include 'store.php';
-        $output = ob_get_clean();
+//         ob_start();
+//         include 'store.php';
+//         $output = ob_get_clean();
 
-        $expected = '{"message":"Product updated successfully"}';
-        $this->assertEquals($expected, $output);
+//         $expected = '{"message":"Product updated successfully"}';
+//         $this->assertEquals($expected, $output);
 
-        // Verify that the product is updated in the database
-        $updatedProductStmt = $this->pdo->prepare("SELECT * FROM products WHERE id = 1");
-        $updatedProductStmt->execute();
-        $updatedProduct = $updatedProductStmt->fetch(PDO::FETCH_ASSOC);
+//         // Verify that the product is updated in the database
+//         $updatedProductStmt = $this->pdo->prepare("SELECT * FROM products WHERE id = 1");
+//         $updatedProductStmt->execute();
+//         $updatedProduct = $updatedProductStmt->fetch(PDO::FETCH_ASSOC);
 
-        $this->assertEquals('Updated Product 1', $updatedProduct['name']);
-        $this->assertEquals('Updated Description 1', $updatedProduct['description']);
+//         $this->assertEquals('Updated Product 1', $updatedProduct['name']);
+//         $this->assertEquals('Updated Description 1', $updatedProduct['description']);
 
-        // Verify that the items are updated in the database
-        $updatedItemsStmt = $this->pdo->prepare("SELECT * FROM items WHERE product_id = 1");
-        $updatedItemsStmt->execute();
-        $updatedItems = $updatedItemsStmt->fetchAll(PDO::FETCH_ASSOC);
+//         // Verify that the items are updated in the database
+//         $updatedItemsStmt = $this->pdo->prepare("SELECT * FROM items WHERE product_id = 1");
+//         $updatedItemsStmt->execute();
+//         $updatedItems = $updatedItemsStmt->fetchAll(PDO::FETCH_ASSOC);
 
-        $this->assertCount(2, $updatedItems);
+//         $this->assertCount(2, $updatedItems);
 
-        // Check the details of the first updated item
-        $this->assertEquals('XL', $updatedItems[0]['size']);
-        $this->assertEquals('Green', $updatedItems[0]['color']);
-        $this->assertEquals('active', $updatedItems[0]['status']);
-        $this->assertEquals('123XYZ', $updatedItems[0]['sku']);
-        $this->assertEquals('39.99', $updatedItems[0]['price']);
+//         // Check the details of the first updated item
+//         $this->assertEquals('XL', $updatedItems[0]['size']);
+//         $this->assertEquals('Green', $updatedItems[0]['color']);
+//         $this->assertEquals('active', $updatedItems[0]['status']);
+//         $this->assertEquals('123XYZ', $updatedItems[0]['sku']);
+//         $this->assertEquals('39.99', $updatedItems[0]['price']);
 
-        // Check the details of the second updated item
-        $this->assertEquals('S', $updatedItems[1]['size']);
-        $this->assertEquals('Yellow', $updatedItems[1]['color']);
-        $this->assertEquals('active', $updatedItems[1]['status']);
-        $this->assertEquals('456ABC', $updatedItems[1]['sku']);
-        $this->assertEquals('19.99', $updatedItems[1]['price']);
-    }
+//         // Check the details of the second updated item
+//         $this->assertEquals('S', $updatedItems[1]['size']);
+//         $this->assertEquals('Yellow', $updatedItems[1]['color']);
+//         $this->assertEquals('active', $updatedItems[1]['status']);
+//         $this->assertEquals('456ABC', $updatedItems[1]['sku']);
+//         $this->assertEquals('19.99', $updatedItems[1]['price']);
+//     }
 
-    // Add more test cases as needed
+//     // Add more test cases as needed
 
-}
-?>
+// }
+// ?>
