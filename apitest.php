@@ -2,7 +2,28 @@
 use PHPUnit\Framework\TestCase;
 
 class apitest extends TestCase
-{
+
+{    private $pdo; // Add this property to store the PDO instance
+
+    protected function setUp(): void
+    {
+        // Initialize PDO connection
+        $host = '127.0.0.1';
+        $dbname = 'php1';
+        $username = 'root';
+        $password = 'root';
+
+        try {
+            $this->pdo = new PDO("mysql:host=$host;dbname=$dbname", $username, $password);
+            $this->pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        } catch (PDOException $e) {
+            echo "Connection failed: " . $e->getMessage();
+            die();
+        }
+
+        // ... other setup code ...
+    }
+
     private $baseUrl = 'http://localhost:8000/store.php';
      // Update with your actual API base URL
 
@@ -116,6 +137,26 @@ class apitest extends TestCase
 
         $this->assertEquals(200, $response['status']);
         $this->assertArrayHasKey('message', $response['data']);
+        $this->assertEquals('Product added successfully', $response['data']['message']);
+
+        // Check if the response contains the product ID
+        $this->assertArrayHasKey('id', $response['data']);
+    
+        // Check if the product details are stored in the database
+        $createdProductId = $response['data']['id'];
+        $createdProduct = $this->getProductById($createdProductId);
+    
+        $this->assertEquals($data['name'], $createdProduct['name']);
+        $this->assertEquals($data['description'], $createdProduct['description']);
+    
+        // Check if the item details are stored in the database
+        // $createdItem = $this->getItemByProductId($createdProductId);
+    
+        // $this->assertEquals($data['items'][0]['size'], $createdItem['size']);
+        // $this->assertEquals($data['items'][0]['color'], $createdItem['color']);
+        // $this->assertEquals($data['items'][0]['status'], $createdItem['status']);
+        // $this->assertEquals($data['items'][0]['sku'], $createdItem['sku']);
+        // $this->assertEquals($data['items'][0]['price'], $createdItem['price']);
         
         
     }
@@ -142,6 +183,23 @@ class apitest extends TestCase
         $response = $this->sendRequest('PUT', $url, $data);
 
         $this->assertEquals(200, $response['status']);
+        $this->assertArrayHasKey('message', $response['data']);
+        $this->assertEquals('Product updated successfully', $response['data']['message']);
+
+        // Check if the product details are updated in the database
+        // $updatedProduct = $this->getProductById($productId);
+
+        // $this->assertEquals($data['name'], $updatedProduct['name']);
+        // $this->assertEquals($data['description'], $updatedProduct['description']);
+
+        // // Check if the item details are updated in the database
+        // $updatedItem = $this->getItemById($data['items'][0]['id']);
+
+        // $this->assertEquals($data['items'][0]['size'], $updatedItem['size']);
+        // $this->assertEquals($data['items'][0]['color'], $updatedItem['color']);
+        // $this->assertEquals($data['items'][0]['status'], $updatedItem['status']);
+        // $this->assertEquals($data['items'][0]['sku'], $updatedItem['sku']);
+        // $this->assertEquals($data['items'][0]['price'], $updatedItem['price']);
         
         // You can add more assertions based on your API response structure
     }
@@ -157,6 +215,28 @@ class apitest extends TestCase
         $this->assertArrayHasKey('message', $response['data']);
         // You can add more assertions based on your API response structure
     }
+    protected function getProductById($productId)
+    {
+        // Implement logic to fetch product details from the database
+        // Adjust this based on your actual database and schema
+
+        $stmt = $this->pdo->prepare("SELECT * FROM products WHERE id = :id");
+        $stmt->bindParam(':id', $productId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    private function getItemByProductId($productId)
+    {
+        // Implement the logic to retrieve items by product ID from your database
+        // For example:
+        $stmt = $this->pdo->prepare("SELECT * FROM items WHERE product_id = :product_id");
+        $stmt->bindParam(':product_id', $productId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
 
     private function sendRequest($method, $url, $data = [])
     {
@@ -188,7 +268,18 @@ class apitest extends TestCase
     //         'image' => new \CurlFile($imagePath, 'image/jpeg', 'test_image.jpg')
     //     ];
 
-    //     $response = $this->sendRequest('POST', $url, $data);
+    //     // Modify the request data to include product_id as a form post variable
+    //     $postData = [
+    //         'product_id' => $productId,
+    //         'image' => $data['image'],
+    //     ];
+
+    //     $response = $this->sendRequest('POST', $url, $postData);
+
+    //     // Log or print the response for debugging
+    //     var_dump($response);
+    //     var_dump($postData);
+    //     var_dump($data['image']);
 
     //     $this->assertEquals(200, $response['status']);
     //     $this->assertArrayHasKey('message', $response['data']);
