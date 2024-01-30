@@ -1,7 +1,7 @@
 <?php
 use PHPUnit\Framework\TestCase;
 
-class apitest extends TestCase
+class featuretest extends TestCase
 
 {    private $pdo; // Add this property to store the PDO instance
 
@@ -186,22 +186,16 @@ class apitest extends TestCase
         $this->assertArrayHasKey('message', $response['data']);
         $this->assertEquals('Product updated successfully', $response['data']['message']);
 
-        // Check if the product details are updated in the database
-        // $updatedProduct = $this->getProductById($productId);
-
-        // $this->assertEquals($data['name'], $updatedProduct['name']);
-        // $this->assertEquals($data['description'], $updatedProduct['description']);
-
-        // // Check if the item details are updated in the database
-        // $updatedItem = $this->getItemById($data['items'][0]['id']);
-
-        // $this->assertEquals($data['items'][0]['size'], $updatedItem['size']);
-        // $this->assertEquals($data['items'][0]['color'], $updatedItem['color']);
-        // $this->assertEquals($data['items'][0]['status'], $updatedItem['status']);
-        // $this->assertEquals($data['items'][0]['sku'], $updatedItem['sku']);
-        // $this->assertEquals($data['items'][0]['price'], $updatedItem['price']);
         
-        // You can add more assertions based on your API response structure
+        $updatedProduct = $this->getProductById($productId);
+
+        $this->assertEquals($data['name'], $updatedProduct['name']);
+        $this->assertEquals($data['description'], $updatedProduct['description']);
+
+        // Check if the item details are updated in the database
+        
+        
+        
     }
 
     public function testDeleteProduct()
@@ -257,67 +251,67 @@ class apitest extends TestCase
 
         return ['status' => $status, 'data' => json_decode($response, true)];
     }
-    // public function testPostProductImage()
-    // {
-    //     $productId = 2; // Update with an existing product ID
-    //     $url = $this->baseUrl . '/image';
-    //     $imagePath = __DIR__ . '/test_image.jpg'; // Update with the path to a test image file
+    public function testPostProductImage()
+    {
+        $productId = 2; // Update with an existing product ID
+        $url = $this->baseUrl . '/image';
+        $imagePath = __DIR__ . '/test_image.jpg'; // Update with the path to a test image file
 
-    //     $data = [
-    //         'product_id' => $productId,
-    //         'image' => new \CurlFile($imagePath, 'image/jpeg', 'test_image.jpg')
-    //     ];
+        $data = [
+            'product_id' => $productId,
+            'image' => new \CurlFile($imagePath, 'image/jpeg', 'test_image.jpg')
+        ];
 
-    //     // Modify the request data to include product_id as a form post variable
-    //     $postData = [
-    //         'product_id' => $productId,
-    //         'image' => $data['image'],
-    //     ];
+        // Modify the request data to include product_id as a form post variable
+        $postData = [
+            'product_id' => $productId,
+            'image' => $data['image'],
+        ];
 
-    //     $response = $this->sendRequest('POST', $url, $postData);
+        $response = $this->sendRequest('POST', $url, $postData);
 
-    //     // Log or print the response for debugging
-    //     var_dump($response);
-    //     var_dump($postData);
-    //     var_dump($data['image']);
+        // Log or print the response for debugging
+        var_dump($response);
+        var_dump($postData);
+        var_dump($data['image']);
 
-    //     $this->assertEquals(200, $response['status']);
-    //     $this->assertArrayHasKey('message', $response['data']);
-    //     $this->assertArrayHasKey('product_id', $response['data']);
-    //     // You can add more assertions based on your API response structure
-    // }
+        $this->assertEquals(200, $response['status']);
+        $this->assertArrayHasKey('message', $response['data']);
+        $this->assertArrayHasKey('product_id', $response['data']);
+        // You can add more assertions based on your API response structure
+    }
     
 
-    // public function testUpdateProductImage()
-    // {
-    //     $imageId = 1; // Update with an existing image ID
-    //     $url = $this->baseUrl . '/update_image';
-    //     $imagePath = __DIR__ . '/test_updated_image.jpg'; // Update with the path to a test image file
+    public function testUpdateProductImage()
+    {
+        $imageId = 1; // Update with an existing image ID
+        $url = $this->baseUrl . '/update_image';
+        $imagePath = __DIR__ . '/test_updated_image.jpg'; // Update with the path to a test image file
 
-    //     $data = [
-    //         'image_id' => $imageId,
-    //         'image' => new \CurlFile($imagePath, 'image/jpeg', 'test_updated_image.jpg')
-    //     ];
+        $data = [
+            'image_id' => $imageId,
+            'image' => new \CurlFile($imagePath, 'image/jpeg', 'test_updated_image.jpg')
+        ];
 
-    //     $response = $this->sendRequest('PUT', $url, $data);
+        $response = $this->sendRequest('PUT', $url, $data);
 
-    //     $this->assertEquals(200, $response['status']);
-    //     $this->assertArrayHasKey('message', $response['data']);
-    //     $this->assertArrayHasKey('image_id', $response['data']);
-    //     // You can add more assertions based on your API response structure
-    // }
+        $this->assertEquals(200, $response['status']);
+        $this->assertArrayHasKey('message', $response['data']);
+        $this->assertArrayHasKey('image_id', $response['data']);
+        // You can add more assertions based on your API response structure
+    }
 
-    // public function testDeleteProductImage()
-    // {
-    //     $imageIdToDelete = 2; // Update with an existing image ID to delete
-    //     $url = $this->baseUrl . '/image/' . $imageIdToDelete;
+    public function testDeleteProductImage()
+    {
+        $imageIdToDelete = 2; // Update with an existing image ID to delete
+        $url = $this->baseUrl . '/image/' . $imageIdToDelete;
 
-    //     $response = $this->sendRequest('DELETE', $url);
+        $response = $this->sendRequest('DELETE', $url);
 
-    //     $this->assertEquals(200, $response['status']);
-    //     $this->assertArrayHasKey('message', $response['data']);
-    //     // You can add more assertions based on your API response structure
-    // }
+        $this->assertEquals(200, $response['status']);
+        $this->assertArrayHasKey('message', $response['data']);
+        // You can add more assertions based on your API response structure
+    }
 
     
 

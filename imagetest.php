@@ -48,6 +48,60 @@ class imagetest extends TestCase
         // $this->assertArrayHasKey('key', $data);
         // $this->assertEquals('expected_value', $data['key']);
     }
+    public function testUpdateImageForProduct()
+    {
+        // Replace with an existing image ID and product ID in your database
+        $imageId = 1;
+        // $productId = 2;
+
+        // Simulate a file upload for update (adjust the file path based on your test file)
+        $updatedImageFilePath = __DIR__ . '/updated_test_image.jpg';
+        $updatedImageFile = Utils::streamFor(fopen($updatedImageFilePath, 'r'));
+
+        $response = $this->client->put("/update_image", [
+            'multipart' => [
+                [
+                    'name' => 'image_id',
+                    'contents' => $imageId,
+                ],
+                // [
+                //     'name' => 'product_id',
+                //     'contents' => $productId,
+                // ],
+                [
+                    'name' => 'image',
+                    'contents' => $updatedImageFile,
+                    'filename' => 'updated_test_image.jpg',
+                ],
+            ],
+        ]);
+
+        $data = json_decode($response->getBody(), true);
+
+        // Assert that the status code is 200 OK
+        $this->assertEquals(200, $response->getStatusCode());
+
+        // Add more assertions based on the expected structure of the response
+        // For example, check if certain keys or values are present
+        // $this->assertArrayHasKey('key', $data);
+        // $this->assertEquals('expected_value', $data['key']);
+    }
+
+    public function testDeleteImage()
+    {
+        // Replace with an existing image ID in your database
+        $imageId = 1;
+
+        $response = $this->client->delete("/image/{$imageId}");
+
+        // Assert that the status code is 200 OK
+        $this->assertEquals(200, $response->getStatusCode());
+
+        // Add more assertions based on the expected structure of the response
+        // For example, check if certain keys or values are present
+        // $this->assertArrayHasKey('key', $data);
+        // $this->assertEquals('expected_value', $data['key']);
+    }
 
     protected function tearDown(): void
     {

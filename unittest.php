@@ -38,6 +38,19 @@ class unittest extends TestCase {
     
         // Assert that the result is an array
         $this->assertIsArray($result);
+        foreach ($result as $item) {
+            $this->assertArrayHasKey('id', $item);
+            $this->assertArrayHasKey('product_id', $item);
+            $this->assertArrayHasKey('size', $item);
+            $this->assertArrayHasKey('color', $item);
+            $this->assertArrayHasKey('status', $item);
+            $this->assertArrayHasKey('sku', $item);
+            $this->assertArrayHasKey('price', $item);
+    
+            // You can add more specific assertions for each key or value
+            // For example, assert that 'status' is 'active' or 'price' is a valid numeric value
+        }
+        
     
         // Add more specific assertions based on the expected behavior
         // For example, you might assert that the result contains certain keys or values
@@ -60,6 +73,11 @@ class unittest extends TestCase {
     
         // Assert that the result is an array
         $this->assertIsArray($result);
+        foreach ($result as $image) {
+        $this->assertArrayHasKey('id', $image);
+        $this->assertArrayHasKey('product_id', $image);
+        $this->assertArrayHasKey('image', $image);
+        }
     
         // Add more specific assertions based on the expected behavior
         // For example, you might assert that the result contains certain keys or values
