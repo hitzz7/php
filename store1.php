@@ -1,8 +1,9 @@
 <?php
 
+
 class Database {
     private $host = '127.0.0.1';
-    private $dbname = 'php1';
+    private $dbname = 'php7';
     private $username = 'root';
     private $password = 'root';
     protected $pdo;
@@ -16,95 +17,148 @@ class Database {
             die();
         }
     }
+    // ... (existing code)
+
+    /**
+     * Executes an SQL query with optional parameters and returns the result.
+     * 
+     * @param string $sql The SQL query to execute.
+     * @param array $params Optional parameters to bind to the query.
+     * @param bool $fetchAll Determines if all rows should be returned (true) or just one (false).
+     * @return mixed The result set or status of the operation.
+     */
+    public function executeQuery($sql, $params = [], $fetchAll = true, $returnLastInsertId = false) {
+        try {
+            $stmt = $this->pdo->prepare($sql);
+    
+            foreach ($params as $key => &$val) {
+                $stmt->bindParam($key, $val);
+            }
+    
+            $stmt->execute();
+    
+            if (strpos(strtoupper($sql), 'SELECT') !== false) {
+                return $fetchAll ? $stmt->fetchAll(PDO::FETCH_ASSOC) : $stmt->fetch(PDO::FETCH_ASSOC);
+            } else {
+                if ($returnLastInsertId) {
+                    return $this->pdo->lastInsertId();
+                } else {
+                    return $stmt->rowCount(); // For INSERT, UPDATE, DELETE
+                }
+            }
+        } catch (PDOException $e) {
+            // Handle exceptions, log errors, or re-throw for higher-level handling
+            echo "Query execution failed: " . $e->getMessage();
+            die();
+        }
+    }
+    public function beginTransaction() {
+        $this->pdo->beginTransaction();
+    }
+    
+    public function commit() {
+        $this->pdo->commit();
+    }
+    
+    public function rollBack() {
+        $this->pdo->rollBack();
+    }
+    public function lastInsertId() {
+        $this->pdo->lastInsertId();
+    }
+    
+    
 }
 
 class Product extends Database {
     public function getAllProducts() {
-        $stmt = $this->pdo->query("SELECT * FROM products");
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-
+        $sql = "SELECT * FROM products";
+        return $this->executeQuery($sql, [], true);
     }
+
     public function getItemsForProduct($productId) {
-        $stmt = $this->pdo->prepare("SELECT * FROM items WHERE product_id = :product_id");
-        $stmt->bindParam(':product_id', $productId, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $sql = "SELECT * FROM items WHERE product_id = :product_id";
+        $params = [':product_id' => $productId];
+        return $this->executeQuery($sql, $params, true);
     }
 
     public function getImagesForProduct($productId) {
-        $stmt = $this->pdo->prepare("SELECT * FROM images WHERE product_id = :product_id");
-        $stmt->bindParam(':product_id', $productId, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $sql = "SELECT * FROM images WHERE product_id = :product_id";
+        $params = [':product_id' => $productId];
+        return $this->executeQuery($sql, $params, true);
     }
 
     public function getProductById($id) {
-        $stmt = $this->pdo->prepare("SELECT * FROM products WHERE id = :id");
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
-        return $stmt->fetch(PDO::FETCH_ASSOC);
+        $sql = "SELECT * FROM products WHERE id = :id";
+        $params = [':id' => $id];
+        return $this->executeQuery($sql, $params, false);
     }
 
     public function addProduct($name, $description, $items) {
         try {
-            // Begin a transaction
-            $this->pdo->beginTransaction();
-    
-            // Insert the product information
-            $stmt = $this->pdo->prepare("INSERT INTO products (name, description) VALUES (:name, :description)");
-            $stmt->bindParam(':name', $name, PDO::PARAM_STR);
-            $stmt->bindParam(':description', $description, PDO::PARAM_STR);
-            $stmt->execute();
-    
-            // Get the new product's ID
+            $this->beginTransaction();
+
+            $sql = "INSERT INTO products (name, description) VALUES (:name, :description)";
+            $params = [':name' => $name, ':description' => $description];
+            $this->executeQuery($sql, $params, false);
+
             $newProductId = $this->pdo->lastInsertId();
-    
-            // Insert items for the new product
+
             foreach ($items as $item) {
                 $this->insertItemForProduct($newProductId, $item);
             }
-    
-            // Commit the transaction
-            $this->pdo->commit();
-    
+
+            $this->commit();
+
             return $newProductId;
         } catch (Exception $e) {
-            // An error occurred, rollback the transaction
-            $this->pdo->rollBack();
-            throw $e; // Re-throw the exception for handling at a higher level
+            $this->rollBack();
+            throw $e;
         }
     }
-    
+
     private function insertItemForProduct($productId, $item) {
-        $stmt = $this->pdo->prepare("INSERT INTO items (product_id, size, color, status, sku, price) 
-                                    VALUES (:product_id, :size, :color, :status, :sku, :price)");
-        $stmt->bindParam(':product_id', $productId, PDO::PARAM_INT);
-        $stmt->bindParam(':size', $item['size'], PDO::PARAM_STR);
-        $stmt->bindParam(':color', $item['color'], PDO::PARAM_STR);
-        $stmt->bindParam(':status', $item['status'], PDO::PARAM_STR);
-        $stmt->bindParam(':sku', $item['sku'], PDO::PARAM_STR);
-        $stmt->bindParam(':price', $item['price'], PDO::PARAM_STR);
-        $stmt->execute();
+        $sql = "INSERT INTO items (product_id, size, color, status, sku, price) 
+                VALUES (:product_id, :size, :color, :status, :sku, :price)";
+        $params = [
+            ':product_id' => $productId,
+            ':size' => $item['size'],
+            ':color' => $item['color'],
+            ':status' => $item['status'],
+            ':sku' => $item['sku'],
+            ':price' => $item['price']
+        ];
+        $this->executeQuery($sql, $params, false);
     }
+
     public function updateProduct($id, $name, $description, $items) {
-        // Implement logic to update a product and its items
-        // ...
+        try {
+            $this->beginTransaction();
 
-        return true; // Success
+            $sql = "UPDATE products SET name = :name, description = :description WHERE id = :id";
+            $params = [':id' => $id, ':name' => $name, ':description' => $description];
+            $this->executeQuery($sql, $params, false);
+
+            foreach ($items as $item) {
+                if (isset($item['id']) && $item['id']) {
+                    $this->updateItem($item);
+                } else {
+                    $this->insertItemForProduct($id, $item);
+                }
+            }
+
+            $this->commit();
+
+            return true;
+        } catch (Exception $e) {
+            $this->rollBack();
+            throw $e;
+        }
     }
 
-    public function deleteProduct($id) {
-        $stmt = $this->pdo->prepare("DELETE FROM products WHERE id = :id");
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        $stmt->execute();
-
-        return true; // Success
-    }
-    
-    
-    // Add more methods as needed
+    // ... (other methods)
 }
+
 
 // Usage example:
 

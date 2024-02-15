@@ -91,7 +91,7 @@ switch ($method) {
                 $stmt->bindParam(':status', $item['status'], PDO::PARAM_STR);
                 $stmt->bindParam(':sku', $item['sku'], PDO::PARAM_STR);
                 $stmt->bindParam(':price', $item['price'], PDO::PARAM_STR);
-                $stmt->execute();
+                $stmt->execute();   
             }
             echo json_encode(['message' => 'Product added successfully', 'id' => $newProductId]);
         } elseif ($endpoint === 'image') {
